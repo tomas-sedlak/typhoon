@@ -14,10 +14,10 @@ import serial  # pip install pyserial
 
 
 class Typhoon():
-    def __init__(self, port: str, length_upper_arm: int = 135, length_lower_arm: int = 190, distance_tool: int = 165, distance_z: int = 0, height_from_ground: int = 135):
-        # self.arduino_serial = serial.Serial(port, 115200)
-        # time.sleep(1.5)
-        # self.arduino_serial.flushInput()
+    def __init__(self, port: str, length_upper_arm: int = 135, length_lower_arm: int = 170, distance_tool: int = 90, distance_z: int = 38, height_from_ground: int = 135):
+        self.arduino_serial = serial.Serial(port, 115200)
+        time.sleep(1.5)
+        self.arduino_serial.flushInput()
 
         self.LENGTH_UPPER_ARM = length_upper_arm
         self.LENGTH_LOWER_ARM = length_lower_arm
@@ -34,7 +34,7 @@ class Typhoon():
         radius = math.sqrt(pow(x, 2) + pow(y, 2))
 
         base_angle = math.atan2(y, x)
-        actual_z = z - self.HEIGTH_FROM_GROUND
+        actual_z = self.HEIGTH_FROM_GROUND - z
         hypotenuse_squared = pow(actual_z, 2) + pow(radius, 2)
         hypotenuse = math.sqrt(hypotenuse_squared)
 
