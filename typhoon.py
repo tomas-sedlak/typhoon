@@ -42,7 +42,7 @@ class Typhoon():
         front_angle = math.acos(self.LENGTH_REAR_SQUARED + self.LENGTH_FRONT_SQUARED - hypotenuse_squared) / (2 * self.LENGTH_UPPER_ARM * self.LENGTH_LOWER_ARM)
 
         # return base_angle * 180 / math.pi, -rear_angle * 180 / math.pi + 67.9130669909833, 77.87547181797633 - front_angle * 180 / math.pi
-        return math.degrees(base_angle), math.degrees(-rear_angle) + 67.9130669909833, 77.87547181797633 - math.degrees(front_angle)
+        return math.degrees(base_angle), math.degrees(rear_angle), math.degrees(front_angle)
 
     def send_x_y_z_pw(self, x: int, y: int, z: int, pw8: int = 0, pw9: int = 0, pw10: int = 0):
         base_angle, upper_angle, lover_angle = self.angles_from_coordinates(x, y, z)
