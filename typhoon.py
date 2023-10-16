@@ -14,10 +14,10 @@ import serial  # pip install pyserial
 
 
 class Typhoon():
-    def __init__(self, port: str, length_upper_arm: int = 135, length_lower_arm: int = 170, distance_tool: int = 90, distance_z: int = 38, height_from_ground: int = 135):
-        self.arduino_serial = serial.Serial(port, 115200)
-        time.sleep(1.5)
-        self.arduino_serial.flushInput()
+    def __init__(self, port: str, length_upper_arm: int = 135, length_lower_arm: int = 170, distance_tool: int = 135, distance_z: int = 0, height_from_ground: int = 135):
+        # self.arduino_serial = serial.Serial(port, 115200)
+        # time.sleep(1.5)
+        # self.arduino_serial.flushInput()
 
         self.LENGTH_UPPER_ARM = length_upper_arm
         self.LENGTH_LOWER_ARM = length_lower_arm
@@ -38,25 +38,20 @@ class Typhoon():
         hypotenuse_squared = pow(actual_z, 2) + pow(radius, 2)
         hypotenuse = math.sqrt(hypotenuse_squared)
 
-        q1 = math.atan2(actual_z, radius)
-        q2 = math.acos((self.LENGTH_REAR_SQUARED - self.LENGTH_FRONT_SQUARED +
-                       hypotenuse_squared) / (2 * self.LENGTH_UPPER_ARM * hypotenuse))
-
-        rear_angle = self.PI_HALF - (q1 + q2)
-        front_angle = self.PI_HALF - (math.acos((self.LENGTH_REAR_SQUARED + self.LENGTH_FRONT_SQUARED -
-                                                 hypotenuse_squared) / (2 * self.LENGTH_UPPER_ARM * self.LENGTH_LOWER_ARM)) - rear_angle)
+        rear_angle = math.atan(radius / actual_z) + math.acos(self.LENGTH_REAR_SQUARED - self.LENGTH_FRONT_SQUARED + hypotenuse_squared) / (2 * self.LENGTH_UPPER_ARM * hypotenuse)
+        front_angle = math.acos(self.LENGTH_REAR_SQUARED + self.LENGTH_FRONT_SQUARED - hypotenuse_squared) / (2 * self.LENGTH_UPPER_ARM * self.LENGTH_LOWER_ARM)
 
         # return base_angle * 180 / math.pi, -rear_angle * 180 / math.pi + 67.9130669909833, 77.87547181797633 - front_angle * 180 / math.pi
         return math.degrees(base_angle), math.degrees(-rear_angle) + 67.9130669909833, 77.87547181797633 - math.degrees(front_angle)
 
     def send_x_y_z_pw(self, x: int, y: int, z: int, pw8: int = 0, pw9: int = 0, pw10: int = 0):
-        base_angle, upper_angle, lover_angle = self.angles_from_coordinates(x, y * 0.8, z)
+        base_angle, upper_angle, lover_angle = self.angles_from_coordinates(x, y, z)
 
         # Poslat data do typhoonu
         self.arduino_serial.write(struct.pack("f", base_angle))
         self.arduino_serial.write(struct.pack("f", lover_angle))
         # hodnota pre nastroj v D8
-        self.arduino_serial.write(struct.pack("f", upper_angle * 0.86))
+        self.arduino_serial.write(struct.pack("f", upper_angle))
         # hodnota pre nastroj v D9
         self.arduino_serial.write(struct.pack("f", pw8))
         # hodnota pre nastroj v D10
