@@ -1,23 +1,37 @@
-#   _______          _
-#  |__   __|        | |
-#     | |_   _ _ __ | |__   ___   ___  _ __
-#     | | | | | '_ \| '_ \ / _ \ / _ \| '_ \
-#     | | |_| | |_) | | | | (_) | (_) | | | |
-#     |_|\__, | .__/|_| |_|\___/ \___/|_| |_|
-#         __/ | |
-#        |___/|_|
+print(
+'''
+  _______          _
+ |__   __|        | |
+    | |_   _ _ __ | |__   ___   ___  _ __
+    | | | | | '_ \| '_ \ / _ \ / _ \| '_ \\
+    | | |_| | |_) | | | | (_) | (_) | | | |
+    |_|\__, | .__/|_| |_|\___/ \___/|_| |_|
+        __/ | |
+       |___/|_|
+''')
 
+import sys
 import math
 import time
 import struct
-import serial  # pip install pyserial
+
+try:
+        import serial
+except ImportError:
+        print("[ERROR] Nemas nainstalovanu kniznicu pyserial.")
+        print("[ERROR] Nainstalujes ju pomocou: pip install pyserial")
+        sys.exit(0)
 
 
 class Typhoon():
     def __init__(self, port: str, length_upper_arm: int = 135, length_lower_arm: int = 190, distance_tool: int = 165, distance_z: int = 0, height_from_ground: int = 135):
-        # self.arduino_serial = serial.Serial(port, 115200)
-        # time.sleep(1.5)
-        # self.arduino_serial.flushInput()
+        try:
+                self.arduino_serial = serial.Serial(port, 115200)
+                self.arduino_serial.flushInput()
+        except serial.serialutil.SerialException:
+                print(f"[ERROR] Neda sa otvorit port '{port}'.")
+                print("[ERROR] Skus nejaky iny port alebo pozri ci mas zapojeny kabel.")
+                sys.exit(0)
 
         self.LENGTH_UPPER_ARM = length_upper_arm
         self.LENGTH_LOWER_ARM = length_lower_arm
@@ -27,6 +41,8 @@ class Typhoon():
         self.LENGTH_REAR_SQUARED = pow(self.LENGTH_UPPER_ARM, 2)
         self.LENGTH_FRONT_SQUARED = pow(self.LENGTH_LOWER_ARM, 2)
         self.PI_HALF = math.pi / 2
+
+        print("[SUCCESS] Uspesne pripojene!")
 
     def angles_from_coordinates(self, x: int, y: int, z: int):
         x += self.DISTANCE_TOOL
@@ -64,7 +80,8 @@ class Typhoon():
         self.arduino_serial.write(struct.pack("f", pw10))
 
         for _ in range(0, 9):  # podla poctu Serial.println v firmware-arduino
-            print(">>", self.arduino_serial.readline().strip().decode("utf-8"))
+            self.arduino_serial.readline()
+            # print(">>", self.arduino_serial.readline().strip().decode("utf-8"))
 
     def send_file(self, file_path: str):
         _file = open(file_path, "r")
