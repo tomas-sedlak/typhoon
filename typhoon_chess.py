@@ -1,8 +1,22 @@
-# from typhoon import Typhoon
-import chess
-import chess.engine
+import sys
 
-# typhoon = Typhoon(port="COM4")
+try:
+     from typhoon import Typhoon
+except ImportError:
+     print("[ERROR] Nenasiel sa modul Typhoon.")
+     print("[ERROR] Najdes ho na GitHube: https://github.com/tomas-sedlak/typhoon")
+     sys.exit(0)
+     
+
+try:
+     import chess
+     import chess.engine
+except ImportError:
+     print("[ERROR] Nemas nainstalovanu kniznicu chess.")
+     print("[ERROR] Nainstalujes ju pomocou: pip install chess")
+     sys.exit(0)
+
+typhoon = Typhoon("COM10")
 
 engine_path = "./stockfish/stockfish.exe"
 engine = chess.engine.SimpleEngine.popen_uci(engine_path)
