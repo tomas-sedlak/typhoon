@@ -1,3 +1,4 @@
+from textwrap import fill
 import tkinter as tk
 import chess
 import chess.engine
@@ -12,16 +13,16 @@ canvas.pack()
 
 board = chess.Board()
 
-levels = {
-    "1": {"skill": 3, "depth": 1, "elo": 800},
-    "2": {"skill": 6, "depth": 2, "elo": 1000},
-    "3": {"skill": 9, "depth": 3, "elo": 1400},
-    "4": {"skill": 11, "depth": 4, "elo": 1600},
-    "5": {"skill": 14, "depth": 6, "elo": 1700},
-    "6": {"skill": 17, "depth": 8, "elo": 1900},
-    "7": {"skill": 20, "depth": 10, "elo": 2000},
-    "8": {"skill": 20, "depth": 12, "elo": 2200}
-}
+levels = [
+    {"skill": 3, "depth": 1, "elo": 800},
+    {"skill": 6, "depth": 2, "elo": 1000},
+    {"skill": 9, "depth": 3, "elo": 1400},
+    {"skill": 11, "depth": 4, "elo": 1600},
+    {"skill": 14, "depth": 6, "elo": 1700},
+    {"skill": 17, "depth": 8, "elo": 1900},
+    {"skill": 20, "depth": 10, "elo": 2000},
+    {"skill": 20, "depth": 12, "elo": 2200}
+]
 
 images = {
     "P": tk.PhotoImage(file="pieces/p_white.png"),
@@ -38,7 +39,7 @@ images = {
     "k": tk.PhotoImage(file="pieces/k_black.png"),
 }
 
-level = 5
+level = 7
 engine_path = "./stockfish/stockfish.exe"
 engine = chess.engine.SimpleEngine.popen_uci(engine_path)
 engine.configure({"Skill level": levels[level]["skill"]})
@@ -95,7 +96,7 @@ def draw_board(color_dark, color_light):
         canvas.create_text(x - size // 4, y + size // 2, text=(8 - i))
 
         for j in range(8):
-            rect = canvas.create_rectangle(x, y, x + size, y + size, fill=color_dark)
+            rect = canvas.create_rectangle(x, y, x + size, y + size, fill=color_dark, tags=("rect"))
             canvas.tag_bind(rect, "<Button-1>", handle_rect)
 
             if i == 7:
@@ -137,17 +138,20 @@ def draw_gui():
     turn = "White" if board.turn else "Black"
     canvas.itemconfig(turn_label, text=f"Turn: {turn}")
     
-    if board.is_check():
-        canvas.itemconfig(check_label, text="Check!!!")
+    if board.is_checkmate():
+        canvas.itemconfig(check_label, text="Checkmate!!!")
+        canvas.itemconfig(check_label, fill="red")
+    elif board.is_check():
+        canvas.itemconfig(check_label, text="Check")
     else:
         canvas.itemconfig(check_label, text="")
 
     canvas.update()
 
-draw_board("green", "white")
+draw_board("#743bbc", "white")
 draw_pieces()
 
 turn_label = canvas.create_text(board_offset_x, board_offset_y // 2, text="Turn: White")
-check_label = canvas.create_text(width // 2, board_offset_y // 2, font=("Helvetica", 20), fill="red")
+check_label = canvas.create_text(width // 2, board_offset_y // 2, font=("Helvetica", 30))
 
 canvas.mainloop()
