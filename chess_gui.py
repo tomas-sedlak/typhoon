@@ -2,9 +2,9 @@ import tkinter as tk
 import chess
 import chess.engine
 
-width, height = 500, 500
-board_offset_x, board_offset_y = 50, 50
-size = 50
+width, height = 600, 600
+board_offset_x, board_offset_y = 60, 60
+size = 60
 move_from = None
 
 canvas = tk.Canvas(width=width, height=height)
@@ -12,10 +12,37 @@ canvas.pack()
 
 board = chess.Board()
 
+levels = {
+    "1": {"skill": 3, "depth": 1, "elo": 800},
+    "2": {"skill": 6, "depth": 2, "elo": 1000},
+    "3": {"skill": 9, "depth": 3, "elo": 1400},
+    "4": {"skill": 11, "depth": 4, "elo": 1600},
+    "5": {"skill": 14, "depth": 6, "elo": 1700},
+    "6": {"skill": 17, "depth": 8, "elo": 1900},
+    "7": {"skill": 20, "depth": 10, "elo": 2000},
+    "8": {"skill": 20, "depth": 12, "elo": 2200}
+}
+
+images = {
+    "P": tk.PhotoImage(file="pieces/p_white.png"),
+    "N": tk.PhotoImage(file="pieces/n_white.png"),
+    "B": tk.PhotoImage(file="pieces/b_white.png"),
+    "R": tk.PhotoImage(file="pieces/r_white.png"),
+    "Q": tk.PhotoImage(file="pieces/q_white.png"),
+    "K": tk.PhotoImage(file="pieces/k_white.png"),
+    "p": tk.PhotoImage(file="pieces/p_black.png"),
+    "n": tk.PhotoImage(file="pieces/n_black.png"),
+    "b": tk.PhotoImage(file="pieces/b_black.png"),
+    "r": tk.PhotoImage(file="pieces/r_black.png"),
+    "q": tk.PhotoImage(file="pieces/q_black.png"),
+    "k": tk.PhotoImage(file="pieces/k_black.png"),
+}
+
+level = 5
 engine_path = "./stockfish/stockfish.exe"
 engine = chess.engine.SimpleEngine.popen_uci(engine_path)
-engine.configure({"Skill level": 1})
-limit = chess.engine.Limit(time=1)
+engine.configure({"Skill level": levels[level]["skill"]})
+limit = chess.engine.Limit(depth=levels[level]["depth"])
 
 def pos_to_grid(x, y):
     return (x - board_offset_x) // size, (y - board_offset_y) // size
@@ -97,7 +124,8 @@ def draw_pieces():
                 x += int(piece) * size
                 continue
             
-            piece = canvas.create_text(x + size // 2, y + size // 2, text=piece, tags=("piece"))
+            piece = canvas.create_image(x + size // 2, y + size // 2, image=images[piece], tags=("piece"))
+            canvas.tag_bind(piece, "<Button-1>", handle_rect)
 
             x += size
 
@@ -116,7 +144,7 @@ def draw_gui():
 
     canvas.update()
 
-draw_board("purple", "white")
+draw_board("green", "white")
 draw_pieces()
 
 turn_label = canvas.create_text(board_offset_x, board_offset_y // 2, text="Turn: White")
