@@ -12,27 +12,27 @@ print(
 
 import sys
 import math
-import time
 import struct
 
 try:
-        import serial
+    import serial
 except ImportError:
-        print("[ERROR] Nemas nainstalovanu kniznicu pyserial.")
-        print("[ERROR] Nainstalujes ju pomocou: pip install pyserial")
-        sys.exit(0)
+    print("[ERROR] Nemas nainstalovanu kniznicu pyserial.")
+    print("[ERROR] Nainstalujes ju pomocou: pip install pyserial")
+    sys.exit(0)
 
 
 class Typhoon():
-    def __init__(self, port: str, length_upper_arm: int = 135, length_lower_arm: int = 190, distance_tool: int = 165, distance_z: int = 0, height_from_ground: int = 135):
+    def __init__(self, port: str, length_upper_arm: int = 135, length_lower_arm: int = 190, distance_tool: int = 165, distance_z: int = 0, height_from_ground: int = 135, output: bool = False):
         try:
-                self.arduino_serial = serial.Serial(port, 115200)
-                self.arduino_serial.flushInput()
+            self.arduino_serial = serial.Serial(port, 115200)
+            self.arduino_serial.flushInput()
         except serial.serialutil.SerialException:
-                print(f"[ERROR] Neda sa otvorit port '{port}'.")
-                print("[ERROR] Skus nejaky iny port alebo pozri ci mas zapojeny kabel.")
-                sys.exit(0)
+            print(f"[ERROR] Neda sa otvorit port '{port}'.")
+            print("[ERROR] Skus nejaky iny port alebo pozri ci mas zapojeny kabel.")
+            sys.exit(0)
 
+        self.OUTPUT = output
         self.LENGTH_UPPER_ARM = length_upper_arm
         self.LENGTH_LOWER_ARM = length_lower_arm
         self.DISTANCE_TOOL = distance_tool
@@ -81,7 +81,8 @@ class Typhoon():
 
         for _ in range(0, 9):  # podla poctu Serial.println v firmware-arduino
             self.arduino_serial.readline()
-            # print(">>", self.arduino_serial.readline().strip().decode("utf-8"))
+            if self.OUTPUT:
+                print(">>", self.arduino_serial.readline().strip().decode("utf-8"))
 
     def send_file(self, file_path: str):
         _file = open(file_path, "r")
