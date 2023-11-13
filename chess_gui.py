@@ -1,4 +1,3 @@
-from textwrap import fill
 import tkinter as tk
 import chess
 import chess.engine
@@ -39,7 +38,7 @@ images = {
     "k": tk.PhotoImage(file="pieces/k_black.png"),
 }
 
-level = 7
+level = 0
 engine_path = "./stockfish/stockfish.exe"
 engine = chess.engine.SimpleEngine.popen_uci(engine_path)
 engine.configure({"Skill level": levels[level]["skill"]})
@@ -57,6 +56,23 @@ def pos_to_uci(x, y):
 def valid_move(uci):
     move = chess.Move.from_uci(uci)
     return move in board.legal_moves
+
+def board_to_input():
+    rows = board.board_fen().split("/")
+    x, y = board_offset_x, board_offset_y
+    output = [[0] * 8]
+
+    for row in rows:
+        x = board_offset_x
+
+        for piece in row:
+            output[y][x] = 1
+
+            x += size
+
+        y += size
+
+    return output
 
 def handle_rect(event):
     global move_from, move_to
