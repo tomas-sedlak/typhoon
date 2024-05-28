@@ -12,7 +12,6 @@ print(
 
 import sys
 import math
-import struct
 import time
 
 try:
@@ -27,7 +26,8 @@ class Typhoon():
     def __init__(self, port: str, length_upper_arm: int = 215, length_lower_arm: int = 250, distance_tool: int = 165, distance_z: int = 0, height_from_ground: int = 0, output: bool = False):
         try:
             self.arduino_serial = serial.Serial(port, 115200)
-            time.sleep(1)
+            while not self.arduino_serial.is_open:
+                time.sleep(0.1)
         except serial.serialutil.SerialException:
             print(f"[ERROR] Neda sa otvorit port '{port}'.")
             print("[ERROR] Skus nejaky iny port alebo pozri ci mas zapojeny kabel.")
@@ -67,37 +67,28 @@ class Typhoon():
         return math.degrees(base_angle), math.degrees(-rear_angle) + 9.120851906137954, 61.64548899867737 - math.degrees(front_angle)
 
     def send(self, x: int, y: int, z: int, pw8: int = 0, pw9: int = 0, pw10: int = 0, sleep: int = 0):
-        base_angle, upper_angle, lover_angle = self.angles_from_coordinates(x, y, z)
+        base_angle, upper_angle, lower_angle = self.angles_from_coordinates(x, y, z)
 
         # Poslat data do typhoonu
-        self.arduino_serial.write(struct.pack("f", base_angle))
-        self.arduino_serial.write(struct.pack("f", lover_angle))
-        self.arduino_serial.write(struct.pack("f", upper_angle))
-        self.arduino_serial.write(struct.pack("f", pw8)) # hodnota pre nastroj v D8
-        self.arduino_serial.write(struct.pack("f", pw9)) # hodnota pre nastroj v D9
-        self.arduino_serial.write(struct.pack("f", pw10)) # hodnota pre nastroj v D10
+        data = f"{base_angle},{lower_angle},{upper_angle},{pw8},{pw9},{pw10}\n".encode()
+        self.arduino_serial.write(data)
 
         # Arduino output
         while True:
-            if self.arduino_serial.inWaiting() > 0:
-                while self.arduino_serial.inWaiting() > 0:
-                    line = self.arduino_serial.readline().strip().decode("utf-8")
-                    if self.OUTPUT: print(">>", line)
+            response = self.arduino_serial.readline().decode().strip()
+            if response == "Done":
                 break
             time.sleep(0.1)
 
         time.sleep(sleep)
 
-    def send_file(self, file_path: str):
+    def send_file(self, file_path: str, separator: str = " "):
         _file = open(file_path, "r")
 
         for line in _file:
-            line = line.strip().split()
-            x = float(line[0])
-            y = float(line[1])
-            z = float(line[2])
-            pw8 = float(line[3])  # 0 ... 255
-            pw9 = float(line[4])  # 0 ... 255
-            pw10 = float(line[5])  # 0 ... 255
+            items = line.strip().split(separator)
+            float_items = [float(item) for item in items]
+            self.send(*float_items)
 
-            self.send(x, y, z, pw8, pw9, pw10)
+    def close(self):
+        self.arduino_serial.close()
