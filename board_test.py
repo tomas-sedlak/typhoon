@@ -2,18 +2,30 @@
 import time, tkinter
 import RPi.GPIO as GPIO
 
-size, rect = 400, 400/8
+size, rect = 400, 400 / 8
 canvas = tkinter.Canvas(width=size, height=size)
 canvas.pack()
 
-pole_st = [[1] * 9] * 9 # Vytvorenie prazdej sachovnice
-pole = [[1] * 9] * 9 # Vytvorenie prazdej sachovnice
+pole_st = []
+for i in range(9):
+    riadky = []
+    for j in range(9):
+        riadky.append(1)
+        pole_st.append(riadky)
+pole = []
+for i in range(9):
+    riadky = []
+    for j in range(9):
+        riadky.append(1)
+    pole.append(riadky)
+
 
 def draw():
     for row in range(8):
         for col in range(8):
-            color = "yellow" if pole[row][col] else "red"
+            color = "yellow" if pole[row + 1][col + 1] else "red"
             canvas.create_rectangle(rect * col, rect * row, rect * (col + 1), rect * (row + 1), fill=color)
+
 
 def tah():
     global pole
@@ -30,28 +42,23 @@ def tah():
 
     for cr in range(1, 9):
         GPIO.output(r[cr], 1)
+        time.sleep(0.005)
         for cs in range(1, 9):
-            GPIO.input(s[cs])
-            if GPIO.input(s[cs]) == 1:
+            inpu = GPIO.input(s[cs])
+
+            if inpu == 1:
                 pole[cr][cs] = 0
-            if GPIO.input(s[cs]) == 0:
+
+            if inpu == 0:
                 pole[cr][cs] = 1
-            # print(GPIO.input(s[cs]),end='')
-            time.sleep(0.001)
-            # print()
         GPIO.output(r[cr], 0)
-        time.sleep(0.001)
     GPIO.cleanup()
     return pole
 
 
-
 while True:
     pole_st = tah()
-    print('*********************')
-    for r in range(1, 9):
-        for s in range(1, 9):
-            print(pole_st[r][s], end='')
+    draw()
+    canvas.update_idletasks()
+    canvas.update()
 
-        print()
-    # time.sleep(0.5)
