@@ -1,30 +1,42 @@
 import sys
-from typhoon_chess_gui import draw_chessboard
+import settings
 
 try:
-     from typhoon import Typhoon
+    from typhoon import Typhoon
 except ImportError:
-     print("[ERROR] Nenasiel sa modul Typhoon.")
-     print("[ERROR] Najdes ho na GitHube: https://github.com/tomas-sedlak/typhoon")
-     sys.exit(0)
+    print("[ERROR] Nenasiel sa modul Typhoon.")
+    print("[ERROR] Najdes ho na GitHube: https://github.com/tomas-sedlak/typhoon")
+    sys.exit(0)
 
 try:
-     import chess
-     import chess.engine
+    import typhoon_chess_gui
 except ImportError:
-     print("[ERROR] Nemas nainstalovanu kniznicu chess.")
-     print("[ERROR] Nainstalujes ju pomocou: pip install chess")
-     sys.exit(0)
+    print("[ERROR] Nenasiel sa modul Typhoon Chess GUI.")
+    print("[ERROR] Najdes ho na GitHube: https://github.com/tomas-sedlak/typhoon")
+    sys.exit(0)
 
-typhoon = Typhoon("COM10")
+try:
+    import chess
+    import chess.engine
+except ImportError:
+    print("[ERROR] Nemas nainstalovanu kniznicu chess.")
+    print("[ERROR] Nainstalujes ju pomocou: pip install chess")
+    sys.exit(0)
 
-engine_path = r"./stockfish/stockfish.exe"
-engine = chess.engine.SimpleEngine.popen_uci(engine_path)
-engine.configure({"Skill level": 1})
-limit = chess.engine.Limit(time=1)
+try:
+    engine = chess.engine.SimpleEngine.popen_uci(settings.STOCKFISH_PATH)
+except:
+    print("[ERROR] Nenasiel sa Stockfish (skontroluj engine_path).")
+    sys.exit(0)
 
+# Initial calls
+typhoon = Typhoon(settings.PORT)
 board = chess.Board()
-draw_chessboard(board)
+typhoon_chess_gui.draw(board)
+
+# Difficulty of stockfish
+engine.configure({"Skill level": 1})
+limit = chess.engine.Limit(time=0.1)
 
 def player_move(old_board, new_board):
     move_from, move_to = "", ""
@@ -45,24 +57,23 @@ def player_move(old_board, new_board):
 
     return move
 
-
 def typhoon_move(engine_move):
     col_from = ord(engine_move[0]) - 96
     row_from = int(engine_move[1])
     col_to = ord(engine_move[2]) - 96
     row_to = int(engine_move[3])
-    typhoon.send(-50 + row_from * 40, -120 + col_from * 40, 0)
-    typhoon.send(-50 + row_to * 40, -120 + col_to * 40, 0)
 
+    typhoon.send(row_from * 20, -120 + col_from * 20, 0)
+    typhoon.send(row_to * 20, -120 + col_to * 20, 0)
 
 def get_outcome():
     winner = board.outcome().winner
     if winner == chess.WHITE:
-        print("White won!")
+        typhoon_chess_gui.message("White won!")
     elif winner == chess.BLACK:
-        print("Black won!")
+        typhoon_chess_gui.message("Black won!")
     else:
-        print("Draw!")
+        typhoon_chess_gui.message("Draw!")
 
 while not board.is_game_over():
     turn = board.turn
@@ -77,13 +88,20 @@ while not board.is_game_over():
     #     typhoon_move(board.uci(engine_move))
     #     draw_chessboard(board)
 
-    engine_move = engine.play(board, limit).move
-    board.push(engine_move)
-    draw_chessboard(board)
-    typhoon_move(board.uci(engine_move))
+    if turn == chess.WHITE:
+        typhoon_chess_gui.message("Ťah hráča", "red")
+        engine_move = engine.play(board, limit).move
+        board.push(engine_move)
+        typhoon_chess_gui.draw(board)
+        # typhoon_move(board.uci(engine_move))
+    elif turn == chess.BLACK:
+        typhoon_chess_gui.message("Ťah robota", "navy")
+        engine_move = engine.play(board, limit).move
+        board.push(engine_move)
+        typhoon_chess_gui.draw(board)
+        # typhoon_move(board.uci(engine_move))
 
 get_outcome()
-engine.quit()
 
 
 
