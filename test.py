@@ -1,17 +1,11 @@
 import typhoon
 
-typhoon = typhoon.Typhoon(port="COM10", output=True)
+typhoon = typhoon.Typhoon(port="COM10")
 
-typhoon.send_file("data.txt", ",")
+for i in range(4):
+    for j in range(4):
+        typhoon.send(i * 80, j * 80, i * 20)
 
-# typhoon.send(0, 0, 0, sleep=2)
-
-# typhoon.send(0, 0, 0, pw10=255, sleep=2)
-
-# typhoon.send(0, 0, 0, sleep=2)
-
-# typhoon.send(0, 0, 0, pw10=255, sleep=2)
-
-# typhoon.send(0, 0, 0)
+typhoon.send(0, 0, 0)
 
 typhoon.close()

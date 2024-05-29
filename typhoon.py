@@ -45,7 +45,7 @@ class Typhoon():
 
         print(f"[SUCCESS] Uspesne pripojene cez port '{port}'!")
 
-    def angles_from_coordinates(self, x: int, y: int, z: int):
+    def angles_from_coords(self, x: int, y: int, z: int):
         x += self.DISTANCE_TOOL
         z += self.DISTANCE_Z
         radius = math.sqrt(pow(x, 2) + pow(y*0.5, 2))
@@ -67,7 +67,7 @@ class Typhoon():
         return math.degrees(base_angle), math.degrees(-rear_angle) + 9.120851906137954, 61.64548899867737 - math.degrees(front_angle)
 
     def send(self, x: int, y: int, z: int, pw8: int = 0, pw9: int = 0, pw10: int = 0):
-        base_angle, upper_angle, lower_angle = self.angles_from_coordinates(x, y, z)
+        base_angle, upper_angle, lower_angle = self.angles_from_coords(x, y, z)
 
         # Poslat data do typhoonu
         data = f"{base_angle},{lower_angle},{upper_angle},{pw8},{pw9},{pw10}\n".encode()
