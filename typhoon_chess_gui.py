@@ -1,7 +1,7 @@
 import tkinter as tk
 import chess
 
-square_size = 70
+square_size = 80
 window_size = square_size * 8
 light_square_color = "#eeeed2"
 dark_square_color = "#769656"
@@ -31,6 +31,17 @@ def draw_board():
         for col in range(8):
             color = light_square_color if (row + col) % 2 == 0 else dark_square_color
             draw_square(row, col, color)
+
+    # Draw numbers
+    for i in range(8):
+        color = dark_square_color if i % 2 == 0 else light_square_color
+        canvas.create_text((i + 0.95) * square_size, square_size * 0.05, text=str(i + 1), font=("Arial", 12, "bold"), fill=color, anchor="ne")
+
+    # Draw letters
+    for i in range(8):
+        letter = chr(65 + i)  # Convert number to uppercase letter (A-H)
+        color = dark_square_color if i % 2 == 0 else light_square_color
+        canvas.create_text(square_size * 0.05, (i + 0.95) * square_size, text=letter, font=("Arial", 12, "bold"), fill=color, anchor="sw")
 
 def draw_pieces(board):
     for square in chess.SQUARES:
