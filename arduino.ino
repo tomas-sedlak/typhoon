@@ -12,6 +12,7 @@ License: MIT
 */
 
 #include "AccelStepper.h"
+#include <Servo.h>
 
 /// START STEPPER MOTOR SETTINGS
 // The NEMA 17 stepper motors that Dobot uses are 200 steps per revolution.
@@ -99,6 +100,9 @@ AccelStepper baseAccelObj(1, E_STEP_PIN, E_DIR_PIN);
 AccelStepper upperArmAccelObj(1, X_STEP_PIN, X_DIR_PIN);
 AccelStepper lowerArmAccelObj(1, Y_STEP_PIN, Y_DIR_PIN);
 
+Servo servo;
+int servoPin = 9;
+
 // the setup function is used to setup code (e.g. variables)
 void setup()
 {
@@ -166,6 +170,8 @@ void setup()
     lowerArmAccelObj.setMaxSpeed(10000);
     lowerArmAccelObj.setSpeed(8000);
     lowerArmAccelObj.setAcceleration(8000);
+
+    servo.attach(servoPin);
 }
 
 // any code that needs to run constantly goes here. this function just keeps getting called (not sure how fast),
@@ -182,21 +188,23 @@ void loop()
         int comma4 = data.indexOf(',', comma3 + 1);
         int comma5 = data.indexOf(',', comma4 + 1);
 
-        float baseAngle = data.substring(0, comma1).toFloat();
-        float lowerArmAngle = data.substring(comma1 + 1, comma2).toFloat();
-        float upperArmAngle = data.substring(comma2 + 1, comma3).toFloat();
-        int power8 = data.substring(comma3 + 1, comma4).toInt();
-        int power9 = data.substring(comma4 + 1, comma5).toInt();
-        int power10 = data.substring(comma5 + 1).toInt();
+        baseAngle = data.substring(0, comma1).toFloat();
+        lowerArmAngle = data.substring(comma1 + 1, comma2).toFloat();
+        upperArmAngle = data.substring(comma2 + 1, comma3).toFloat();
+        powerD8 = data.substring(comma3 + 1, comma4).toInt();
+        powerD9 = data.substring(comma4 + 1, comma5).toInt();
+        powerD10 = data.substring(comma5 + 1).toInt();
 
         moveArmToAngles(baseAngle, upperArmAngle, lowerArmAngle);
 
         Serial.print("PowerD8:");
         Serial.println(powerD8);
         digitalWrite(8, powerD8);
+
         Serial.print("PowerD9:");
         Serial.println(powerD9);
-        analogWrite(9, powerD9);
+        servo.write(powerD9 + 90);
+
         Serial.print("PowerD10:");
         Serial.println(powerD10);
         analogWrite(10, powerD10);
