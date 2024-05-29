@@ -191,8 +191,14 @@ void loop()
 
         moveArmToAngles(baseAngle, upperArmAngle, lowerArmAngle);
 
+        Serial.print("PowerD8:");
+        Serial.println(powerD8);
         digitalWrite(8, powerD8);
+        Serial.print("PowerD9:");
+        Serial.println(powerD9);
         analogWrite(9, powerD9);
+        Serial.print("PowerD10:");
+        Serial.println(powerD10);
         analogWrite(10, powerD10);
 
         Serial.println("Done");
@@ -201,36 +207,43 @@ void loop()
 
 void moveArmToAngles(float baseAngle, float upperArmAngle, float lowerArmAngle)
 {
+    Serial.print("Base Angle");
+    Serial.println(baseAngle);
     int baseStepNumber = ((abs(baseAngle) / 360) * baseActualStepsPerRevolution) + 0.5;
     // need this because of the abs value function, which is needed for proper rounding
     if (baseAngle < 1)
     {
         baseStepNumber *= -1;
     }
-
+    Serial.print("Base Step Number:");
+    Serial.println(baseStepNumber);
+    Serial.print("Upper Arm Angle:");
+    Serial.println(upperArmAngle);
     int upperArmStepNumber = ((abs(upperArmAngle) / 360) * upperArmActualStepsPerRevolution) + 0.5;
     // need this because of the abs value function, which is needed for proper rounding
     if (upperArmAngle < 1)
     {
         upperArmStepNumber *= -1;
     }
-
+    Serial.print("Upper Arm Step Number:");
+    Serial.println(upperArmStepNumber);
+    Serial.print("Lower Arm Angle:");
+    Serial.println(lowerArmAngle);
     int lowerArmStepNumber = ((abs(lowerArmAngle) / 360) * lowerArmActualStepsPerRevolution) + 0.5;
     // need this because of the abs value function, which is needed for proper rounding
     if (lowerArmAngle < 1)
     {
         lowerArmStepNumber *= -1;
     }
-
+    Serial.print("Lower Arm Step Number:");
+    Serial.println(lowerArmStepNumber);
     // necessary to reverse the direction in which the steppers move, so anngles match my defined angles
     baseStepNumber *= -1;
     upperArmStepNumber *= -1;
     // lowerArmStepNumber *= -1;
-
     baseAccelObj.moveTo(baseStepNumber);
     upperArmAccelObj.moveTo(upperArmStepNumber);
     lowerArmAccelObj.moveTo(lowerArmStepNumber);
-
     while ((lowerArmAccelObj.distanceToGo() != 0) || (upperArmAccelObj.distanceToGo() != 0) || (baseAccelObj.distanceToGo() != 0))
     {
         baseAccelObj.run();
