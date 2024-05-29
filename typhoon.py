@@ -26,8 +26,8 @@ class Typhoon():
     def __init__(self, port: str, length_upper_arm: int = 215, length_lower_arm: int = 250, distance_tool: int = 165, distance_z: int = 0, height_from_ground: int = 0, output: bool = False):
         try:
             self.arduino_serial = serial.Serial(port, 115200)
-            while not self.arduino_serial.is_open:
-                time.sleep(0.1)
+            self.arduino_serial.flushInput()
+            time.sleep(1.5)
         except serial.serialutil.SerialException:
             print(f"[ERROR] Neda sa otvorit port '{port}'.")
             print("[ERROR] Skus nejaky iny port alebo pozri ci mas zapojeny kabel.")
@@ -66,7 +66,7 @@ class Typhoon():
         # return base_angle * 180 / math.pi, -rear_angle * 180 / math.pi + 67.9130669909833, 77.87547181797633 - front_angle * 180 / math.pi
         return math.degrees(base_angle), math.degrees(-rear_angle) + 9.120851906137954, 61.64548899867737 - math.degrees(front_angle)
 
-    def send(self, x: int, y: int, z: int, pw8: int = 0, pw9: int = 0, pw10: int = 0, sleep: int = 0):
+    def send(self, x: int, y: int, z: int, pw8: int = 0, pw9: int = 0, pw10: int = 0):
         base_angle, upper_angle, lower_angle = self.angles_from_coordinates(x, y, z)
 
         # Poslat data do typhoonu
@@ -75,12 +75,13 @@ class Typhoon():
 
         # Arduino output
         while True:
-            response = self.arduino_serial.readline().decode().strip()
-            if response == "Done":
-                break
+            while self.arduino_serial.in_waiting > 0:
+                response = self.arduino_serial.readline().decode().strip()
+                if response == "Done":
+                    return
+                elif self.OUTPUT:
+                    print(">>", response)
             time.sleep(0.1)
-
-        time.sleep(sleep)
 
     def send_file(self, file_path: str, separator: str = " "):
         _file = open(file_path, "r")
