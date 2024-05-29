@@ -203,7 +203,14 @@ void loop()
 
         Serial.print("PowerD9:");
         Serial.println(powerD9);
-        servo.write(powerD9 + 90);
+        if (powerD9 > 0)
+        {
+            servo.write(130);
+        }
+        else
+        {
+            servo.write(90);
+        }
 
         Serial.print("PowerD10:");
         Serial.println(powerD10);
