@@ -23,7 +23,7 @@ except ImportError:
 
 
 class Typhoon():
-    def __init__(self, port: str, length_upper_arm: int = 215, length_lower_arm: int = 250, distance_tool: int = 165, distance_z: int = 0, height_from_ground: int = 0, output: bool = False):
+    def __init__(self, port: str, length_upper_arm: int = 215, length_lower_arm: int = 250, distance_tool: int = 240, distance_z: int = 25, height_from_ground: int = 0, output: bool = False):
         try:
             self.arduino_serial = serial.Serial(port, 115200)
             self.arduino_serial.flushInput()
@@ -46,12 +46,13 @@ class Typhoon():
         print(f"[SUCCESS] Uspesne pripojene cez port '{port}'!")
 
     def angles_from_coords(self, x: int, y: int, z: int):
-        x += self.DISTANCE_TOOL
+        x += self.DISTANCE_TOOL +y/25*x/105 -x/85*y/20
         z += self.DISTANCE_Z
-        radius = math.sqrt(pow(x, 2) + pow(y*0.5, 2))
+        y=y*0.9
+        radius = math.sqrt(pow(x, 2) + pow(y, 2))-50
 
-        base_angle = math.atan2(y*0.5, x)
-        actual_z = z - self.HEIGTH_FROM_GROUND
+        base_angle = math.atan2(y, x)
+        actual_z = z - self.HEIGTH_FROM_GROUND + radius/6.2
         hypotenuse_squared = pow(actual_z, 2) + pow(radius, 2)
         hypotenuse = math.sqrt(hypotenuse_squared)
 
@@ -64,7 +65,7 @@ class Typhoon():
                                                  hypotenuse_squared) / (2 * self.LENGTH_UPPER_ARM * self.LENGTH_LOWER_ARM)) - rear_angle)
 
         # return base_angle * 180 / math.pi, -rear_angle * 180 / math.pi + 67.9130669909833, 77.87547181797633 - front_angle * 180 / math.pi
-        return math.degrees(base_angle), math.degrees(-rear_angle) + 9.120851906137954, 61.64548899867737 - math.degrees(front_angle)
+        return math.degrees(base_angle), math.degrees(-rear_angle)+1.3, 40.5- math.degrees(front_angle)
 
     def send_coords(self, x: int, y: int, z: int):
         base_angle, upper_angle, lower_angle = self.angles_from_coords(x, y, z)
