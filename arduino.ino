@@ -181,40 +181,35 @@ void loop()
     {
         String data = Serial.readStringUntil('\n');
 
-        // Extract all values (including power signals)
-        int comma1 = data.indexOf(',');
-        int comma2 = data.indexOf(',', comma1 + 1);
-        int comma3 = data.indexOf(',', comma2 + 1);
-        int comma4 = data.indexOf(',', comma3 + 1);
-        int comma5 = data.indexOf(',', comma4 + 1);
-
-        baseAngle = data.substring(0, comma1).toFloat();
-        lowerArmAngle = data.substring(comma1 + 1, comma2).toFloat();
-        upperArmAngle = data.substring(comma2 + 1, comma3).toFloat();
-        powerD8 = data.substring(comma3 + 1, comma4).toInt();
-        powerD9 = data.substring(comma4 + 1, comma5).toInt();
-        powerD10 = data.substring(comma5 + 1).toInt();
-
-        moveArmToAngles(baseAngle, upperArmAngle, lowerArmAngle);
-
-        Serial.print("PowerD8:");
-        Serial.println(powerD8);
-        digitalWrite(8, powerD8);
-
-        Serial.print("PowerD9:");
-        Serial.println(powerD9);
-        if (powerD9 > 0)
+        if (data == "coords")
         {
-            servo.write(130);
-        }
-        else
-        {
-            servo.write(90);
+            String coords = Serial.readStringUntil('\n');
+
+            // Extract all values
+            int comma1 = coords.indexOf(",");
+            int comma2 = coords.indexOf(",", comma1 + 1);
+
+            baseAngle = coords.substring(0, comma1).toFloat();
+            lowerArmAngle = coords.substring(comma1 + 1, comma2).toFloat();
+            upperArmAngle = coords.substring(comma2 + 1).toFloat();
+
+            moveArmToAngles(baseAngle, upperArmAngle, lowerArmAngle);
         }
 
-        Serial.print("PowerD10:");
-        Serial.println(powerD10);
-        analogWrite(10, powerD10);
+        if (data == "powers")
+        {
+            String powers = Serial.readStringUntil('\n');
+
+            // Extract all values
+            int comma1 = powers.indexOf(",");
+            int comma2 = powers.indexOf(",", comma1 + 1);
+
+            powerD8 = powers.substring(0, comma1).toInt();
+            powerD9 = powers.substring(comma1 + 1, comma2).toInt();
+            powerD10 = powers.substring(comma2 + 1).toInt();
+
+            sendPowers(powerD8, powerD9, powerD10);
+        }
 
         Serial.println("Done");
     }
@@ -265,6 +260,28 @@ void moveArmToAngles(float baseAngle, float upperArmAngle, float lowerArmAngle)
         upperArmAccelObj.run();
         lowerArmAccelObj.run();
     }
+}
+
+void sendPowers(int powerD8, int powerD9, int powerD10)
+{
+    Serial.print("PowerD8:");
+    Serial.println(powerD8);
+    digitalWrite(8, powerD8);
+
+    Serial.print("PowerD9:");
+    Serial.println(powerD9);
+    if (powerD9 > 0)
+    {
+        servo.write(130);
+    }
+    else
+    {
+        servo.write(90);
+    }
+
+    Serial.print("PowerD10:");
+    Serial.println(powerD10);
+    analogWrite(10, powerD10);
 }
 
 // NOT USING THIS FUNCTION

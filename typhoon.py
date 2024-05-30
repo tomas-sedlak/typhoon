@@ -66,11 +66,28 @@ class Typhoon():
         # return base_angle * 180 / math.pi, -rear_angle * 180 / math.pi + 67.9130669909833, 77.87547181797633 - front_angle * 180 / math.pi
         return math.degrees(base_angle), math.degrees(-rear_angle) + 9.120851906137954, 61.64548899867737 - math.degrees(front_angle)
 
-    def send(self, x: int, y: int, z: int, pw8: int = 0, pw9: int = 0, pw10: int = 0):
+    def send_coords(self, x: int, y: int, z: int):
         base_angle, upper_angle, lower_angle = self.angles_from_coords(x, y, z)
 
         # Poslat data do typhoonu
-        data = f"{base_angle},{lower_angle},{upper_angle},{pw8},{pw9},{pw10}\n".encode()
+        data = f"{base_angle},{lower_angle},{upper_angle}\n".encode()
+        self.arduino_serial.write("coords\n".encode())
+        self.arduino_serial.write(data)
+
+        # Arduino output
+        while True:
+            while self.arduino_serial.in_waiting > 0:
+                response = self.arduino_serial.readline().decode().strip()
+                if response == "Done":
+                    return
+                elif self.OUTPUT:
+                    print(">>", response)
+            time.sleep(0.1)
+    
+    def send_powers(self, pw8: int = 0, pw9: int = 0, pw10: int = 0):
+        # Poslat data do typhoonu
+        data = f"{pw8},{pw9},{pw10}\n".encode()
+        self.arduino_serial.write("powers\n".encode())
         self.arduino_serial.write(data)
 
         # Arduino output
