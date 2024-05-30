@@ -16,7 +16,7 @@ window_width = board_width + 2 * padding
 board_height = square_size * 8
 window_height = board_height + padding + padding_top
 
-# Setup tkinter Canvas
+# Setup tkinter components
 canvas = tk.Canvas(width=window_width, height=window_height)
 canvas.pack()
 
@@ -29,45 +29,43 @@ def load_pieces():
             filename = f"images/{color}_{piece_type}.png"
             image = tk.PhotoImage(file=filename)
 
-            piece_type = piece_type.upper() if color == "white" else piece_type.lower()
-            piece_images[piece_type] = image
+            piece_name = piece_type.upper() if color == "white" else piece_type.lower()
+            piece_images[piece_name] = image
 
-def draw_square(row, col, color):
+def get_color(row, col):
+    return light_square_color if (row + col) % 2 == 0 else dark_square_color
+
+def draw_square(row, col, color, outline=None):
     x1 = (col * square_size) + padding
     y1 = (row * square_size) + padding_top
     x2 = x1 + square_size
     y2 = y1 + square_size
-    canvas.create_rectangle(x1, y1, x2, y2, fill=color, width=0)
+    canvas.create_rectangle(x1, y1, x2, y2, fill=color, width=0 if not outline else 5, outline=outline)
 
 def draw_board():
     for row in range(8):
         for col in range(8):
-            color = light_square_color if (row + col) % 2 == 0 else dark_square_color
+            color = get_color(row, col)
             draw_square(row, col, color)
 
     # Draw numbers
     for i in range(8):
-        number = str(i + 1)
-        # Top
-        canvas.create_text((i + 0.5) * square_size + padding, padding_top - text_offset, text=number, font=font)
-        # Bottom
-        canvas.create_text((i + 0.5) * square_size + padding, board_height + padding_top + text_offset, text=number, font=font)
+        letter = chr(65 + i)  # Convert number to uppercase letter (A-H)
+        canvas.create_text((i + 0.5) * square_size + padding, padding_top - text_offset, text=letter, font=font) # Top
+        canvas.create_text((i + 0.5) * square_size + padding, board_height + padding_top + text_offset, text=letter, font=font) # Bottom
 
     # Draw letters
     for i in range(8):
-        letter = chr(65 + i)  # Convert number to uppercase letter (A-H)
-        # Left
-        canvas.create_text(padding - text_offset, (i + 0.5) * square_size + padding_top, text=letter, font=font)
-        # Right
-        canvas.create_text(board_width + padding + text_offset, (i + 0.5) * square_size + padding_top, text=letter, font=font)
+        number = str(8 - i)
+        canvas.create_text(padding - text_offset, (i + 0.5) * square_size + padding_top, text=number, font=font) # Left
+        canvas.create_text(board_width + padding + text_offset, (i + 0.5) * square_size + padding_top, text=number, font=font) # Right
 
 def draw_pieces(board):
     for square in chess.SQUARES:
         piece = board.piece_at(square)
         if piece is not None:
-            rank, file = chess.square_name(square)
-            row = ord(rank) - 97
-            col = int(file) - 1
+            row = 7 - chess.square_rank(square)
+            col = chess.square_file(square)
             x = (col * square_size) + square_size // 2 + padding
             y = (row * square_size) + square_size // 2 + padding_top
             piece_name = piece.symbol()
@@ -75,14 +73,30 @@ def draw_pieces(board):
             if image:
                 canvas.create_image(x, y, image=image)
 
+def draw_highlight(move):
+    # Square from
+    from_row = 7 - chess.square_rank(move.from_square)
+    from_col = chess.square_file(move.from_square)
+    from_color = get_color(from_row, from_col)
+    draw_square(from_row, from_col, color=from_color, outline="yellow")
+
+    # Square to
+    to_row = 7 - chess.square_rank(move.to_square)
+    to_col = chess.square_file(move.to_square)
+    to_color = get_color(to_row, to_col)
+    draw_square(to_row, to_col, color=to_color, outline="yellow")
+
 def message(message, color="black"):
     message_label.config(text=message, fg=color)
     canvas.update()
 
-def draw(board):
+def draw(board, move=None):
     canvas.delete("all")
+
     draw_board()
+    if move: draw_highlight(move)
     draw_pieces(board)
+
     canvas.update()
     canvas.update_idletasks()
 

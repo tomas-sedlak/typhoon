@@ -36,7 +36,38 @@ typhoon_chess_gui.draw(board)
 
 # Difficulty of stockfish
 engine.configure({"Skill level": 1})
-limit = chess.engine.Limit(time=0.1)
+limit = chess.engine.Limit(time=2)
+
+capture_y = 180
+capture_x = 0
+
+def grab(square):
+    row = 7 - chess.square_rank(square)
+    col = chess.square_file(square)
+
+    typhoon.send_coords(row * settings.SQUARE_SIZE, col * settings.SQUARE_SIZE, 0)
+    typhoon.send_coords(row * settings.SQUARE_SIZE, col * settings.SQUARE_SIZE, -40)
+    typhoon.send_coords(row * settings.SQUARE_SIZE, col * settings.SQUARE_SIZE, 0)
+
+def place(square):
+    row = 7 - chess.square_rank(square)
+    col = chess.square_file(square)
+
+    typhoon.send_coords(row * settings.SQUARE_SIZE, col * settings.SQUARE_SIZE, 0)
+    typhoon.send_coords(row * settings.SQUARE_SIZE, col * settings.SQUARE_SIZE, -40)
+    typhoon.send_powers(pw9=1)
+    typhoon.send_coords(row * settings.SQUARE_SIZE, col * settings.SQUARE_SIZE, 0)
+    typhoon.send_powers(pw9=0)
+
+def capture():
+    global capture_x
+    typhoon.send_coords(capture_y * settings.SQUARE_SIZE, capture_x * settings.SQUARE_SIZE, 0)
+    typhoon.send_coords(capture_y * settings.SQUARE_SIZE, capture_x * settings.SQUARE_SIZE, -40)
+    typhoon.send_powers(pw9=1)
+    typhoon.send_coords(capture_y * settings.SQUARE_SIZE, capture_x * settings.SQUARE_SIZE, 0)
+    typhoon.send_powers(pw9=0)
+
+    capture_x += settings.SQUARE_SIZE
 
 def player_move(old_board, new_board):
     move_from, move_to = "", ""
@@ -57,14 +88,23 @@ def player_move(old_board, new_board):
 
     return move
 
-def typhoon_move(engine_move):
-    col_from = ord(engine_move[0]) - 96
-    row_from = int(engine_move[1])
-    col_to = ord(engine_move[2]) - 96
-    row_to = int(engine_move[3])
+def typhoon_move():
+    move = engine.play(board, limit).move
 
-    typhoon.send(row_from * 20, -120 + col_from * 20, 0)
-    typhoon.send(row_to * 20, -120 + col_to * 20, 0)
+    to_square = move.to_square
+    from_square = move.from_square
+    captured_piece = board.piece_at(to_square)
+
+    board.push(move)
+    typhoon_chess_gui.draw(board, move)
+
+    # Check if capture
+    if captured_piece:
+        grab(to_square)
+        capture()
+
+    grab(from_square)
+    place(to_square)
 
 def get_outcome():
     winner = board.outcome().winner
@@ -87,19 +127,12 @@ while not board.is_game_over():
     #     print(board.uci(engine_move))
     #     typhoon_move(board.uci(engine_move))
     #     draw_chessboard(board)
-
     if turn == chess.WHITE:
         typhoon_chess_gui.message("Ťah hráča", "red")
-        engine_move = engine.play(board, limit).move
-        board.push(engine_move)
-        typhoon_chess_gui.draw(board)
-        # typhoon_move(board.uci(engine_move))
+        typhoon_move()
     elif turn == chess.BLACK:
         typhoon_chess_gui.message("Ťah robota", "navy")
-        engine_move = engine.play(board, limit).move
-        board.push(engine_move)
-        typhoon_chess_gui.draw(board)
-        # typhoon_move(board.uci(engine_move))
+        typhoon_move()
 
 get_outcome()
 
