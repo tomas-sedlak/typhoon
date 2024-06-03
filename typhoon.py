@@ -11,8 +11,8 @@ print(
 ''')
 
 import sys
-import math
 import time
+from math import sqrt, atan2, acos, sin, cos, degrees, pi
 
 try:
     import serial
@@ -23,7 +23,7 @@ except ImportError:
 
 
 class Typhoon():
-    def __init__(self, port: str, length_upper_arm: int = 215, length_lower_arm: int = 250, distance_tool: int = 240, distance_z: int = 25, height_from_ground: int = 0, output: bool = False):
+    def __init__(self, port: str, start_x: int, start_y: int, start_z: int, tool_x: int = 0, tool_y: int = 0, tool_z: int = 0, output: bool = False, length_upper_arm: int = 215, length_lower_arm: int = 250):
         try:
             self.arduino_serial = serial.Serial(port, 115200)
             self.arduino_serial.flushInput()
@@ -33,42 +33,54 @@ class Typhoon():
             print("[ERROR] Skus nejaky iny port alebo pozri ci mas zapojeny kabel.")
             sys.exit(0)
 
+        self.START_X = start_x
+        self.START_Y = start_y
+        self.START_Z = start_z
+        self.TOOL_X = tool_x
+        self.TOOL_Y = tool_y
+        self.TOOL_Z = tool_z
         self.OUTPUT = output
         self.LENGTH_UPPER_ARM = length_upper_arm
         self.LENGTH_LOWER_ARM = length_lower_arm
-        self.DISTANCE_TOOL = distance_tool
-        self.DISTANCE_Z = distance_z
-        self.HEIGTH_FROM_GROUND = height_from_ground
-        self.LENGTH_REAR_SQUARED = pow(self.LENGTH_UPPER_ARM, 2)
-        self.LENGTH_FRONT_SQUARED = pow(self.LENGTH_LOWER_ARM, 2)
-        self.PI_HALF = math.pi / 2
+        # self.LENGTH_REAR_SQUARED = pow(self.LENGTH_UPPER_ARM, 2)
+        # self.LENGTH_FRONT_SQUARED = pow(self.LENGTH_LOWER_ARM, 2)
+        # self.PI_HALF = math.pi / 2
 
         print(f"[SUCCESS] Uspesne pripojene cez port '{port}'!")
 
     def angles_from_coords(self, x: int, y: int, z: int):
-        x += self.DISTANCE_TOOL +y/25*x/105 -x/85*y/20
-        z += self.DISTANCE_Z
-        y=y*0.9
-        radius = math.sqrt(pow(x, 2) + pow(y, 2))-50
+        x += self.START_X
+        # y += self.START_Y
 
-        base_angle = math.atan2(y, x)
-        actual_z = z - self.HEIGTH_FROM_GROUND + radius/6.2
-        hypotenuse_squared = pow(actual_z, 2) + pow(radius, 2)
-        hypotenuse = math.sqrt(hypotenuse_squared)
+        print(x, y, z)
 
-        q1 = math.atan2(actual_z, radius)
-        q2 = math.acos((self.LENGTH_REAR_SQUARED - self.LENGTH_FRONT_SQUARED +
-                       hypotenuse_squared) / (2 * self.LENGTH_UPPER_ARM * hypotenuse))
+        r = sqrt(x**2 + y**2)
+        q1 = atan2(y, x)
+        q3 = acos((r**2 + z**2 - self.LENGTH_UPPER_ARM**2 - self.LENGTH_LOWER_ARM**2) / (2 * self.LENGTH_UPPER_ARM * self.LENGTH_LOWER_ARM))
+        q2 = atan2(z, r) + atan2(self.LENGTH_LOWER_ARM * sin(q3), self.LENGTH_UPPER_ARM + self.LENGTH_LOWER_ARM * cos(q3))
 
-        rear_angle = self.PI_HALF - (q1 + q2)
-        front_angle = self.PI_HALF - (math.acos((self.LENGTH_REAR_SQUARED + self.LENGTH_FRONT_SQUARED -
-                                                 hypotenuse_squared) / (2 * self.LENGTH_UPPER_ARM * self.LENGTH_LOWER_ARM)) - rear_angle)
+        # actual_z = z - self.HEIGTH_FROM_GROUND + radius/6.2
+        # hypotenuse_squared = pow(actual_z, 2) + pow(radius, 2)
+        # hypotenuse = math.sqrt(hypotenuse_squared)
+
+        # q1 = math.atan2(actual_z, radius)
+        # q2 = math.acos((self.LENGTH_REAR_SQUARED - self.LENGTH_FRONT_SQUARED +
+        #                hypotenuse_squared) / (2 * self.LENGTH_UPPER_ARM * hypotenuse))
+
+        # rear_angle = self.PI_HALF - (q1 + q2)
+        # front_angle = self.PI_HALF - (math.acos((self.LENGTH_REAR_SQUARED + self.LENGTH_FRONT_SQUARED -
+        #                                          hypotenuse_squared) / (2 * self.LENGTH_UPPER_ARM * self.LENGTH_LOWER_ARM)) - rear_angle)
 
         # return base_angle * 180 / math.pi, -rear_angle * 180 / math.pi + 67.9130669909833, 77.87547181797633 - front_angle * 180 / math.pi
-        return math.degrees(base_angle), math.degrees(-rear_angle)+1.3, 40.5- math.degrees(front_angle)
+        # return math.degrees(base_angle), math.degrees(-rear_angle)+1.3, 40.5- math.degrees(front_angle)
+
+        print(degrees(q1), degrees(pi / 2 - q2), degrees(q3))
+
+        return degrees(q1), degrees(pi / 2 - q2), degrees(-1 * (q3 - q2))
 
     def send_coords(self, x: int, y: int, z: int):
         base_angle, upper_angle, lower_angle = self.angles_from_coords(x, y, z)
+        print(base_angle, upper_angle, lower_angle)
 
         # Poslat data do typhoonu
         data = f"{base_angle},{lower_angle},{upper_angle}\n".encode()

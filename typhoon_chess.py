@@ -1,4 +1,6 @@
 import sys
+import time
+# import RPi.GPIO as GPIO
 import settings
 
 try:
@@ -34,6 +36,14 @@ typhoon = Typhoon(settings.PORT)
 board = chess.Board()
 typhoon_chess_gui.draw(board)
 
+# Setpu GPIO
+col_ports = [17, 27, 22, 5, 6, 13, 19, 26]
+row_ports = [2, 3, 4, 25, 8, 7, 23, 24]
+# GPIO.setmode(GPIO.BCM)
+# GPIO.setwarnings(False)
+# for port in col_ports: GPIO.setup(port, GPIO.IN)
+# for port in row_ports: GPIO.setup(port, GPIO.OUT)
+
 # Difficulty of stockfish
 engine.configure({"Skill level": 1})
 limit = chess.engine.Limit(time=2)
@@ -41,22 +51,23 @@ limit = chess.engine.Limit(time=2)
 capture_y = 180
 capture_x = 0
 
-def grab(square):
+def to_pos(square):
     row = 7 - chess.square_rank(square)
     col = chess.square_file(square)
+    return -80 + row * settings.SQUARE_SIZE + settings.SQUARE_SIZE // 2, -90 + col * settings.SQUARE_SIZE + settings.SQUARE_SIZE // 2
 
-    typhoon.send_coords(row * settings.SQUARE_SIZE, col * settings.SQUARE_SIZE, 0)
-    typhoon.send_coords(row * settings.SQUARE_SIZE, col * settings.SQUARE_SIZE, -40)
-    typhoon.send_coords(row * settings.SQUARE_SIZE, col * settings.SQUARE_SIZE, 0)
+def grab(square):
+    x, y = to_pos(square)
+    typhoon.send_coords(x, y, 0)
+    typhoon.send_coords(x, y, -40)
+    typhoon.send_coords(x, y, 0)
 
 def place(square):
-    row = 7 - chess.square_rank(square)
-    col = chess.square_file(square)
-
-    typhoon.send_coords(row * settings.SQUARE_SIZE, col * settings.SQUARE_SIZE, 0)
-    typhoon.send_coords(row * settings.SQUARE_SIZE, col * settings.SQUARE_SIZE, -40)
+    x, y = to_pos(square)
+    typhoon.send_coords(x, y, 0)
+    typhoon.send_coords(x, y, -40)
     typhoon.send_powers(pw9=1)
-    typhoon.send_coords(row * settings.SQUARE_SIZE, col * settings.SQUARE_SIZE, 0)
+    typhoon.send_coords(x, y, 0)
     typhoon.send_powers(pw9=0)
 
 def capture():
@@ -69,7 +80,25 @@ def capture():
 
     capture_x += settings.SQUARE_SIZE
 
-def player_move(old_board, new_board):
+def input_from_chessboard():
+    new_board = [[0 for _ in range(8)] for _ in range(8)]
+
+    for row in range(8):
+        GPIO.output(row_ports[row], 1)
+        time.sleep(0.005)
+
+        for col in range(8):
+            if GPIO.input(col_ports[col]) == 1:
+                new_board[row][col] = 0
+            else:
+                new_board[row][col] = 1
+
+        GPIO.output(row_ports[row], 0)
+    GPIO.cleanup()
+
+    return new_board
+
+def evaluate_move(old_board, new_board):
     move_from, move_to = "", ""
     hrac_urobil_tah = 0
 
@@ -84,9 +113,22 @@ def player_move(old_board, new_board):
 
     move = chess.Move.from_uci(move_from + move_to)
     if hrac_urobil_tah == 1:
-        print('Hrac:', move)
+        return move
 
-    return move
+def player_move():
+    last_chessboard = None
+    chessboard = None
+    move = None
+
+    while True:
+        last_chessboard = chessboard
+        chessboard = input_from_chessboard()
+        move = evaluate_move(last_chessboard, chessboard)
+        if move: break
+        time.sleep(0.1)
+
+    board.push(move)
+    typhoon_chess_gui.draw(board, move)
 
 def typhoon_move():
     move = engine.play(board, limit).move
@@ -129,6 +171,7 @@ while not board.is_game_over():
     #     draw_chessboard(board)
     if turn == chess.WHITE:
         typhoon_chess_gui.message("Ťah hráča", "red")
+        # player_move()
         typhoon_move()
     elif turn == chess.BLACK:
         typhoon_chess_gui.message("Ťah robota", "navy")

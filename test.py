@@ -1,11 +1,8 @@
 import typhoon
 
-typhoon = typhoon.Typhoon(port="COM10")
+typhoon = typhoon.Typhoon("COM10", 135, 0, 0, 50, 0, 75)
 
-for i in range(4):
-    for j in range(4):
-        typhoon.send(i * 80, j * 80, i * 20)
-
-typhoon.send(0, 0, 0)
+typhoon.send_coords(100, 0, 0)
+typhoon.send_coords(0, 0, 0)
 
 typhoon.close()
