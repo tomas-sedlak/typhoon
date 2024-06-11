@@ -1,8 +1,8 @@
 import sys
 import time
-from typhoon.bcolors import bcolors
 from typhoon import calculations
 from typhoon import communication
+from typhoon.bcolors import bcolors
 
 try:
     import serial
@@ -45,23 +45,22 @@ class Typhoon():
 
         self.x, self.y, self.z = start_x, start_y, start_z
         self.base_angle, self.upper_angle, self.lower_angle = 0, 0, 0
-        self.last_base_angle, self.last_upper_angle, self.last_lower_angle = calculations.angles_from_coords(start_x, start_y, start_z)
+        self.start_base_angle, self.start_upper_angle, self.start_lower_angle = calculations.angles_from_coords(self.x, self.y, self.z)
+
+        self.START_X, self.START_Y, self.START_Z = start_x, start_y, start_z
+        self.OUTPUT = output
 
     def move_to(self, x: int, y: int, z: int) -> None:
         """Moves the arm to the specified coordinates."""
 
-        self.x, self.y, self.z = x, y, z
-        self.base_angle, self.upper_angle, self.lower_angle = calculations.angles_from_coords(x, y, z)
+        self.x, self.y, self.z = self.START_X + x, self.START_Y + y, self.START_Z + z
+        self.base_angle, self.upper_angle, self.lower_angle = calculations.angles_from_coords(self.x, self.y, self.z)
 
-        base_angle = self.base_angle - self.last_base_angle
-        upper_angle = self.upper_angle - self.last_upper_angle
-        lower_angle = self.lower_angle - self.last_lower_angle
+        base_angle = calculations.steps_from_angles(self.base_angle - self.start_base_angle)
+        upper_angle = calculations.steps_from_angles(self.upper_angle - self.start_upper_angle)
+        lower_angle = calculations.steps_from_angles(self.lower_angle - self.start_lower_angle)
 
-        self.last_base_angle = self.base_angle
-        self.last_upper_angle = self.upper_angle
-        self.last_lower_angle = self.lower_angle
-
-        communication.send(self.serial, "coords", f"{base_angle},{upper_angle},{lower_angle}")
+        communication.send(self.serial, "coords", f"{base_angle},{lower_angle},{upper_angle}", output=self.OUTPUT)
 
     def activate_tool(self, pw8: int = 0, pw9: int = 0, pw10: int = 0) -> None:
         """
@@ -70,7 +69,7 @@ class Typhoon():
         Args:
             state: Dictionary with tool names as keys and desired states (True/False) as values.
         """
-        communication.send(self.serial, "powers", f"{pw8},{pw9},{pw10}")
+        communication.send(self.serial, "powers", f"{pw8},{pw9},{pw10}", output=self.OUTPUT)
 
     def get_angles(self) -> tuple[int, int, int]:
         """Returns the current base, upper, and lower arm angles."""
