@@ -1,11 +1,13 @@
 import tkinter as tk
 import chess
+import chess.engine
 import json
+import tk_async_execute as tae
 
 import os
 dirname = os.path.dirname(__file__)
 
-from components.button import Button
+from components import Button
 from constants import BG_COLOR, FG_COLOR
 
 class Play(tk.Frame):
@@ -29,6 +31,8 @@ class Play(tk.Frame):
         self.canvas_size = self.rect_size * 8
         self.canvas = tk.Canvas(content, width=self.canvas_size, height=self.canvas_size, highlightthickness=0)
         self.canvas.pack()
+
+        tae.start()
 
     def load_pieces(self):
         for piece_type in ("p", "r", "n", "b", "q", "k"):
@@ -71,8 +75,21 @@ class Play(tk.Frame):
                 if image:
                     self.canvas.create_image(x, y, image=image)
 
+    async def main(self):
+        path = os.path.join(dirname, "../../../stockfish/stockfish.exe")
+        transport, engine = await chess.engine.popen_uci(path)
+
+        while not self.board.is_game_over():
+            result = await engine.play(self.board, chess.engine.Limit(time=0.1))
+            self.board.push(result.move)
+            print(self.board)
+            self.draw_pieces()
+
+        await engine.quit()
+
     def start(self):
         self.board = chess.Board()
+        tae.async_execute(self.main(), wait=False, visible=False, pop_up=False)
         self.load_theme()
         self.draw_board()
         self.draw_pieces()

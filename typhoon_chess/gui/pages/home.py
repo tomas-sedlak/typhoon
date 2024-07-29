@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from components.button import Button
+from components import Button
 from constants import BG_COLOR, FG_COLOR, FG_COLOR_SECONDARY
 
 class Home(tk.Frame):

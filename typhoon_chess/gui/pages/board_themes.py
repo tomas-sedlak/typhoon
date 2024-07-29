@@ -4,8 +4,7 @@ import json
 import os
 dirname = os.path.dirname(__file__)
 
-from components.button import Button
-from components.board_theme import BoardTheme
+from components import BoardTheme, Button
 from constants import BG_COLOR, FG_COLOR
 
 class BoardThemes(tk.Frame):

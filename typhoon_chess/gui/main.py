@@ -2,9 +2,7 @@ import tkinter as tk
 import os
 dirname = os.path.dirname(__file__)
 
-from pages.play import Play
-from pages.home import Home
-from pages.board_themes import BoardThemes
+from pages import Home, Play, BoardThemes
 from constants import BG_COLOR, FG_COLOR_SECONDARY
 
 class TyphoonChessGui(tk.Tk):
@@ -14,8 +12,8 @@ class TyphoonChessGui(tk.Tk):
         self.title("Typhoon Chess")
         self.config(bg=BG_COLOR)
         self.minsize(800, 480)
-        # icon = tk.PhotoImage(file=)
-        # self.iconphoto(True, icon)
+        icon = tk.PhotoImage(file=os.path.join(dirname, "../assets/icons/icon_new.png"))
+        self.iconphoto(True, icon)
 
         self.typhoon_label = tk.Label(self, text="Typhoon, v1.0.0", font="Helvetica 10", bg=BG_COLOR, fg=FG_COLOR_SECONDARY, padx=8, pady=8)
         self.typhoon_label.place(relx=1, rely=1, anchor="se")
