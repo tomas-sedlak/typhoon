@@ -1,12 +1,12 @@
 import tkinter as tk
 import json
+
 import os
+dirname = os.path.dirname(__file__)
 
 from components.button import Button
 from components.board_theme import BoardTheme
 from constants import BG_COLOR, FG_COLOR
-
-dirname = os.path.dirname(__file__)
 
 class BoardThemes(tk.Frame):
     def __init__(self, parent, controller):
@@ -22,7 +22,7 @@ class BoardThemes(tk.Frame):
         back_button = Button(content, text="Back", icon_left="arrow_back", command=go_back)
         back_button.place(x=0, y=0)
 
-        path = os.path.join(dirname, "../../assets/board_colors.json")
+        path = os.path.join(dirname, "../../assets/board_themes.json")
         data = json.load(open(path, "r"))
 
         config_path = os.path.join(dirname, "../../config.json")

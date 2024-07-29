@@ -2,6 +2,7 @@ import tkinter as tk
 import os
 dirname = os.path.dirname(__file__)
 
+from pages.play import Play
 from pages.home import Home
 from pages.board_themes import BoardThemes
 from constants import BG_COLOR, FG_COLOR_SECONDARY
@@ -24,6 +25,10 @@ class TyphoonChessGui(tk.Tk):
         home = Home(self, self)
         home.place(relx=0, rely=0, relwidth=1, relheight=1)
         self.frames["home"] = home
+
+        play = Play(self, self)
+        play.place(relx=0, rely=0, relwidth=1, relheight=1)
+        self.frames["play"] = play
         
         themes = BoardThemes(self, self)
         themes.place(relx=0, rely=0, relwidth=1, relheight=1)
@@ -33,6 +38,7 @@ class TyphoonChessGui(tk.Tk):
 
     def show_frame(self, cont):
         frame = self.frames[cont]
+        if cont == "play": frame.start()
         frame.tkraise()
         self.typhoon_label.tkraise()
 
