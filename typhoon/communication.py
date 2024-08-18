@@ -1,5 +1,5 @@
 import time
-from typhoon.bcolors import bcolors
+import bcolors
 
 def send(serial, *lines, output = False):
     # Poslat data do typhoonu

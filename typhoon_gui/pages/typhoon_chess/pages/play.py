@@ -32,8 +32,6 @@ class Play(tk.Frame):
         self.canvas = tk.Canvas(content, width=self.canvas_size, height=self.canvas_size, highlightthickness=0)
         self.canvas.pack()
 
-        tae.start()
-
     def load_pieces(self):
         for piece_type in ("p", "r", "n", "b", "q", "k"):
             for color in ("w", "b"):
@@ -82,7 +80,6 @@ class Play(tk.Frame):
         while not self.board.is_game_over():
             result = await engine.play(self.board, chess.engine.Limit(time=0.1))
             self.board.push(result.move)
-            print(self.board)
             self.draw_pieces()
 
         await engine.quit()

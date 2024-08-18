@@ -1,4 +1,5 @@
-from typhoon.main import Typhoon
+from .main import Typhoon
+from .bcolors import bcolors
 
 print(r'''
   _______          _

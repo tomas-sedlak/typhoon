@@ -1,19 +1,17 @@
 import tkinter as tk
-from constants import BG_COLOR_SECONDARY, FG_COLOR
-
-import os
-dirname = os.path.dirname(__file__)
+from colors import BG_COLOR_SECONDARY, FG_COLOR
+from config import ICONS_DIR_PATH
 
 class Button(tk.Frame):
-    def __init__(self, master, text=None, icon_left=None, icon_right=None, command=None):
-        super().__init__(master, bg=BG_COLOR_SECONDARY, padx=16, pady=8, cursor="hand2")
+    def __init__(self, parent, text=None, icon_left=None, icon_right=None, command=None):
+        super().__init__(parent, bg=BG_COLOR_SECONDARY, padx=16, pady=8, cursor="hand2")
 
         self.columnconfigure(1, weight=1)
 
         if command: self.bind("<Button-1>", command)
 
         if icon_left:
-            path = os.path.join(dirname, f"../../assets/icons/{icon_left}.png")
+            path = ICONS_DIR_PATH / f"{icon_left}.png"
             self.icon_left_image = tk.PhotoImage(file=path)
             icon_label = tk.Label(self, image=self.icon_left_image, bg=BG_COLOR_SECONDARY)
             icon_label.grid(row=0, column=0, padx=(0, 4))
@@ -25,7 +23,7 @@ class Button(tk.Frame):
             if command: label.bind("<Button-1>", command)
 
         if icon_right:
-            path = os.path.join(dirname, f"../../assets/icons/{icon_right}.png")
+            path = ICONS_DIR_PATH / f"{icon_right}.png"
             self.icon_right_image = tk.PhotoImage(file=path)
             icon_label = tk.Label(self, image=self.icon_right_image, bg=BG_COLOR_SECONDARY)
             icon_label.grid(row=0, column=2, padx=(4, 0))

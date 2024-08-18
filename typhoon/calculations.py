@@ -1,5 +1,5 @@
 import math
-from typhoon import config
+import config
 
 def angles_from_coords(x: int, y: int, z: int) -> tuple[float, float, float]:
     r = math.sqrt(x**2 + y**2)

@@ -22,4 +22,8 @@ class Home(tk.Frame):
 
         go_themes = lambda event: controller.show_frame("themes")
         themes_button = Button(content, text="Board Themes", icon_left="grid_view", command=go_themes)
-        themes_button.pack(fill="x")
+        themes_button.pack(fill="x", pady=(0, 8))
+
+        go_paint = lambda event: controller.show_frame("paint")
+        paint_button = Button(content, text="Paint", icon_left="brush", command=go_paint)
+        paint_button.pack(fill="x")
