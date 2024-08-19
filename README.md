@@ -41,12 +41,12 @@ This is how our full code looks like:
 ```python
 from typhoon import Typhoon
 
-typhoon = typhoon.Typhoon("COM3", 130, 0, 0, output=True)
+typhoon = Typhoon("COM3", 130, 0, 0, output=True)
 typhoon.move_to(100, 0, 0)
 typhoon.close()
 ```
 
-## Typhoon object
+## Typhoon class
 
 Core developer interface for typhoon.
 
@@ -63,20 +63,21 @@ Core developer interface for typhoon.
 
 ## Creating custom Typhoon GUI
 
-```
-- components
-    - custom_component.py
-    - ...
-- data
-    - data.csv
-    - data.json
-    - ...
-- pages
-    - home_page.py
-    - settings_page.py
-    - ...
-- main.py
-- config.json
+```bash
+.
+├── components
+|   ├── custom_component.py
+|   └── ...
+├── data
+|   ├── data.csv
+|   ├── data.json
+|   └── ...
+├── pages
+|   ├── home_page.py
+|   ├── settings_page.py
+|   └── ...
+├── main.py
+└── config.json
 ```
 
 Contents of `config.json` file:
@@ -86,6 +87,6 @@ Contents of `config.json` file:
     "name": "Typhoon Chess",
     "icon": "play_circle",
     "version": "1.0.0",
-    "author": "Fname Lname <email@example.com>"
+    "author": "John Doe <email@example.com>"
 }
 ```
