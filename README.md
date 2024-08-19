@@ -63,7 +63,7 @@ Core developer interface for typhoon.
 
 ## Creating custom Typhoon GUI
 
-```bash
+```
 .
 ├── components
 |   ├── custom_component.py
