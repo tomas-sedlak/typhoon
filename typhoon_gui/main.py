@@ -24,7 +24,9 @@ class TyphoonGui(tk.Tk):
 
             f = open(config)
             data = json.load(f)
-            pages.append(data)
+            
+            button = Button(self, text=data["name"], icon_left=data["icon"])
+            button.pack()
 
         # self.frames = {}
 
