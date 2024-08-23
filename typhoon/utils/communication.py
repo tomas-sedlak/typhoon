@@ -1,20 +1,31 @@
 import time
 from utils import bcolors
+from serial import Serial
 
-def send(serial, *lines, output = False):
-    # Poslat data do typhoonu
-    for line in lines:
-        data = (line + "\n").encode()
-        serial.write(data)
+class Communication:
+    def send(self, serial: Serial, *lines, output = False) -> None:
+        """
+        Sends data to the Typhoon and optionally prints the response.
 
-    # Arduino output
-    while True:
-        while serial.in_waiting > 0:
-            response = serial.readline().decode().strip()
+        Args:
+            serial: The serial object representing the Typhoon.
+            lines: Data that should be sent to Typhoon.
+            output: Whether to print the received response (default: False).
+        """
 
-            if response == "Done":
-                if output: print("-" * 50)
-                return
-            elif output:
-                print(f"{bcolors.BOLD}>>{bcolors.ENDC} {response}")
-        time.sleep(0.1)
+        # Send data to typhoonu
+        for line in lines:
+            data = (line + "\n").encode()
+            serial.write(data)
+
+        # Arduino output
+        while True:
+            while serial.in_waiting > 0:
+                response = serial.readline().decode().strip()
+
+                if response == "Done":
+                    if output: print("-" * 50)
+                    return
+                elif output:
+                    print(f"{bcolors.BOLD}>>{bcolors.ENDC} {response}")
+            time.sleep(0.1)
