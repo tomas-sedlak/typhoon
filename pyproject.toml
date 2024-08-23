@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "typhoon"
+version = "0.0.1"
+dependencies = [
+    "pyserial",
+]
+authors = [
+  { name="Tomas Sedlak", email="t.sedlak.24@gmail.com" },
+]
+description = "Library to communicate with Typhoon robotic arm."
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/tomas-sedlak/typhoon"
+Issues = "https://github.com/tomas-sedlak/typhoon/issues"
