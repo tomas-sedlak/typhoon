@@ -1,5 +1,5 @@
 import math
-from utils import config
+from typhoon.utils import config
 
 class Calculations:
     def angles_from_coords(self, x: int, y: int, z: int) -> tuple[float, float, float]:

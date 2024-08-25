@@ -1,6 +1,6 @@
 import time
-from utils import bcolors
 from serial import Serial
+from typhoon.utils import bcolors
 
 class Communication:
     def send(self, serial: Serial, *lines, output = False) -> None:

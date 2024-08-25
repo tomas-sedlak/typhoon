@@ -3,8 +3,8 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "typhoon"
-version = "0.0.1"
+name = "typhoon-robotic-arm"
+version = "0.0.3"
 dependencies = [
     "pyserial",
 ]

@@ -1,8 +1,8 @@
 import sys
 import time
-from utils import bcolors
-from utils import Calculations
-from utils import Communication
+from typhoon.utils import bcolors
+from typhoon.utils import Calculations
+from typhoon.utils import Communication
 
 try:
     import serial
