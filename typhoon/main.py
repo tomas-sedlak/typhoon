@@ -50,7 +50,7 @@ class Typhoon():
         self.START_X, self.START_Y, self.START_Z = start_x, start_y, start_z
         self.OUTPUT = output
 
-    def move_to(self, x: int, y: int, z: int) -> None:
+    def goto(self, x: int, y: int, z: int) -> None:
         """Moves the arm to the specified coordinates."""
 
         self.x, self.y, self.z = self.START_X + x, self.START_Y + y, self.START_Z + z
@@ -62,7 +62,7 @@ class Typhoon():
 
         Communication.send(self.serial, "coords", f"{base_angle},{lower_angle},{upper_angle}", output=self.OUTPUT)
 
-    def activate_tool(self, pw8: int = 0, pw9: int = 0, pw10: int = 0) -> None:
+    def tool(self, pw8: int = 0, pw9: int = 0, pw10: int = 0) -> None:
         """
         Sets the state of the tool (e.g., gripper open/close, suction on/off).
 

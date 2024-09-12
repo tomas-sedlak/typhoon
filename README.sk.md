@@ -1,13 +1,13 @@
-# Typhoon Robotic Arm
+# Robotické rameno Typhoon
 
 [![en](https://img.shields.io/badge/lang-en-red.svg)](README.md)
 [![sk](https://img.shields.io/badge/lang-sk-green.svg)](README.sk.md)
 
-`typhoon-robotic-arm` is a Python library that enables control of the Typhoon robotic arm. This library provides various functionalities, including calculations, communication and movement of the arm.
+`typhoon-robotic-arm` je Python knižnica, ktorá umožňuje ovládanie robotického ramena Typhoon. Táto knižnica poskytuje rôzne funkcie vrátane výpočtov, komunikácie a pohybu ramena.
 
-## Installation
+## Inštalácia
 
-Requires **Python 3.8+**. Download and install the latest release:
+Potrebný je **Python 3.8+**. Najnovšiu verziu stiahneš týmto príkazom:
 
 ```bash
 pip install pyserial
