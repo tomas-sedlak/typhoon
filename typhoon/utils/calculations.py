@@ -14,6 +14,7 @@ def angles_from_coords(x: int, y: int, z: int) -> tuple[float, float, float]:
         A tuple of joint angles (q1, q2, q3).
     """
 
+    z -= config.HEIGHT_FROM_GROUND
     r = math.sqrt(x**2 + y**2)
     q1 = math.atan2(y, x)
     q3 = math.acos((r**2 + z**2 - config.LENGTH_LOWER_ARM**2 - config.LENGTH_UPPER_ARM**2) / (2 * config.LENGTH_LOWER_ARM * config.LENGTH_UPPER_ARM))

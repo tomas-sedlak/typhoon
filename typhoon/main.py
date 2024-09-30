@@ -1,6 +1,5 @@
 import sys
 import time
-import math
 from typhoon.utils import bcolors
 from typhoon.utils import calculations
 from typhoon.utils import communication
@@ -16,7 +15,7 @@ class Typhoon():
     """Controls a Typhoon robotic arm through serial communication."""
 
     def __init__(self, port: str, start_x: int, start_y: int, start_z: int,
-                 tool_x: int = 0, tool_y: int = 0, tool_z: int = 0,
+                 tool_offset_x: int = 0, tool_offset_y: int = 0, tool_offset_z: int = 0,
                  output: bool = False) -> None:
         """
         Initializes the Typhoon robotic arm object with serial port and starting position.
@@ -26,9 +25,9 @@ class Typhoon():
             start_x: Initial X coordinate.
             start_y: Initial Y coordinate.
             start_z: Initial Z coordinate.
-            tool_x: Offset of the tool in X from the arm center (default 0).
-            tool_y: Offset of the tool in Y from the arm center (default 0).
-            tool_z: Offset of the tool in Z from the arm center (default 0).
+            tool_offset_x: Offset of the tool in X from the arm center (default 0).
+            tool_offset_y: Offset of the tool in Y from the arm center (default 0).
+            tool_offset_z: Offset of the tool in Z from the arm center (default 0).
             output: Enable printing debug messages (default False).
             length_upper_arm: Length of the upper arm (default 215).
             length_lower_arm: Length of the lower arm (default 250).
@@ -44,17 +43,17 @@ class Typhoon():
             print(f"{bcolors.FAIL}[ERROR]{bcolors.ENDC} Try a different port or check if the cable is connected.")
             sys.exit(0)
 
-        self.x, self.y, self.z = start_x, start_y, start_z
+        self.x, self.y, self.z = 0, 0, 0
         self.joint1_angle, self.joint2_angle, self.joint3_angle = 0, 0, 0
         
-        self.START_JOINT1_ANGLE, self.START_JOINT2_ANGLE, self.START_JOINT3_ANGLE = calculations.angles_from_coords(self.x, self.y, self.z)
-        self.START_X, self.START_Y, self.START_Z = start_x, start_y, start_z
+        self.START_JOINT1_ANGLE, self.START_JOINT2_ANGLE, self.START_JOINT3_ANGLE = calculations.angles_from_coords(start_x, start_y, start_z)
+        self.TOOL_OFFSET_X, self.TOOL_OFFSET_Y, self.TOOL_OFFSET_Z = tool_offset_x, tool_offset_y, tool_offset_z
         self.OUTPUT = output
 
     def goto(self, x: int, y: int, z: int) -> None:
         """Moves the arm to the specified coordinates."""
 
-        self.x, self.y, self.z = self.START_X + x, self.START_Y + y, self.START_Z + z
+        self.x, self.y, self.z = x - self.TOOL_OFFSET_X, y - self.TOOL_OFFSET_Y, z - self.TOOL_OFFSET_Z
         self.joint1_angle, self.joint2_angle, self.joint3_angle = calculations.angles_from_coords(self.x, self.y, self.z)
 
         joint1_steps = calculations.steps_from_angle(self.START_JOINT1_ANGLE - self.joint1_angle)

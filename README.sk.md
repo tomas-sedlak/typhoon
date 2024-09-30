@@ -11,7 +11,7 @@ Potrebný je **Python 3.8+**. Najnovšiu verziu stiahneš týmto príkazom:
 
 ```bash
 pip install pyserial
-pip install -i https://test.pypi.org/simple/ typhoon-robotic-arm
+pip install typhoon-robotic-arm
 ```
 
 ## Quickstart

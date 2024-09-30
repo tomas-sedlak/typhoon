@@ -11,10 +11,8 @@ Requires **Python 3.8+**. Download and install the latest release:
 
 ```bash
 pip install pyserial
-pip install -i https://test.pypi.org/simple/ typhoon-robotic-arm
+pip install typhoon-robotic-arm
 ```
-
-More info on our [Test PyPi site](https://test.pypi.org/project/typhoon-robotic-arm/).
 
 ## Quickstart
 
