@@ -50,7 +50,7 @@ class Typhoon():
         self.TOOL_OFFSET_X, self.TOOL_OFFSET_Y, self.TOOL_OFFSET_Z = tool_offset_x, tool_offset_y, tool_offset_z
         self.OUTPUT = output
 
-    def goto(self, x: int, y: int, z: int) -> None:
+    def move_to(self, x: int, y: int, z: int) -> None:
         """Moves the arm to the specified coordinates."""
 
         self.x, self.y, self.z = x - self.TOOL_OFFSET_X, y - self.TOOL_OFFSET_Y, z - self.TOOL_OFFSET_Z
@@ -59,6 +59,17 @@ class Typhoon():
         joint1_steps = calculations.steps_from_angle(self.START_JOINT1_ANGLE - self.joint1_angle)
         joint2_steps = calculations.steps_from_angle(self.START_JOINT2_ANGLE - self.joint2_angle)
         joint3_steps = calculations.steps_from_angle(self.START_JOINT3_ANGLE - self.joint3_angle) - joint2_steps # na tomto sme stravili 4 dni!!!
+        
+        communication.send(self.serial, "coords", f"{joint1_steps},{joint2_steps},{joint3_steps}", output=self.OUTPUT)
+
+    def move_home(self) -> None:
+        """Moves the arm to the starting position."""
+
+        self.joint1_angle, self.joint2_angle, self.joint3_angle = self.START_JOINT1_ANGLE, self.START_JOINT2_ANGLE, self.START_JOINT3_ANGLE
+
+        joint1_steps = calculations.steps_from_angle(self.START_JOINT1_ANGLE)
+        joint2_steps = calculations.steps_from_angle(self.START_JOINT2_ANGLE)
+        joint3_steps = calculations.steps_from_angle(self.START_JOINT3_ANGLE) - joint2_steps # na tomto sme stravili 4 dni!!!
         
         communication.send(self.serial, "coords", f"{joint1_steps},{joint2_steps},{joint3_steps}", output=self.OUTPUT)
 

@@ -10,7 +10,6 @@
 Requires **Python 3.8+**. Download and install the latest release:
 
 ```bash
-pip install pyserial
 pip install typhoon-robotic-arm
 ```
 
@@ -19,10 +18,10 @@ pip install typhoon-robotic-arm
 ```python
 from typhoon import Typhoon
 
-typhoon = Typhoon("COM3", 130, 0, 0, output=True)
+typhoon = Typhoon("COM3", 0, 170, 130, output=True)
 
 typhoon.move_to(100, 0, 0)
-typhoon.activate_tool(pw9=255)
+typhoon.tool(pw9=255)
 typhoon.move_to(0, 0, 0)
 
 typhoon.close()
@@ -30,33 +29,36 @@ typhoon.close()
 
 ## References
 
-*class* **Typhoon**(*port: str, start_x: int, start_y: int, start_z: int, tool_x: int = 0, tool_y: int = 0, tool_z: int = 0, output: bool = False*)
+*class* **Typhoon**(*port: str, start_x: int, start_y: int, start_z: int, tool_offset_x: int = 0, tool_offset_y: int = 0, tool_offset_z: int = 0, output: bool = False*)
 
 - Controls a Typhoon robotic arm through serial communication. Offers a user-friendly interface for various arm operations.
 
 - **Parameters:**
 
-    - **port** (*required*) - Port on which is typhoon robotic arm connected. You can check this in your Device Manager on - Windows under USB Connector Managers.
+    - **port** (*required*) - Port on which is typhoon robotic arm connected. You can check this in your Device Manager on Windows under USB Connector Managers.
     - **start_x** (*required*): - Startring X position of robotic arm.
     
     - **start_y** (*required*) - Startring Y position of robotic arm.
     
     - **start_z** (*required*) - Startring Z position of robotic arm.
     
-    - **tool_x** - X offset of the tool.
+    - **tool_offset_x** - X offset of the tool.
     
-    - **tool_y** - Y offset of the tool.
+    - **tool_offset_y** - Y offset of the tool.
     
-    - **tool_z** - Z offset of the tool.
+    - **tool_offset_z** - Z offset of the tool.
     
     - **output** - If you want to see output from the Arduino board.
 
 
 - **Methods:**
 
-    - **goto**(*x: int, y: int, z: int*):
+    - **move_to**(*x: int, y: int, z: int*):
         - Moves the arm to the specified coordinates.
         - Calculates the required angles and sends them to the arm.
+
+    - **move_home**():
+        - Moves the arm to the starting position.
 
     - **tool**(*pw8: int = 0, pw9: int = 0, pw10: int = 0*):
 
